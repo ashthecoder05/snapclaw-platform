@@ -1,0 +1,127 @@
+{
+  "dashboard": {
+    "title": "AI Agent Platform Dashboard",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Active Agents",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "count(up{job=\"agents\"}==1)"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Total Messages Processed",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(agent_messages_total[5m]))"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "API Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"control-api\"}[5m])"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "Agent CPU Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{namespace=\"agents\"}[5m])"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4}
+      },
+      {
+        "id": 5,
+        "title": "Agent Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes{namespace=\"agents\"}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "Deployment Success Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(deployments_success_total[1h])) / sum(rate(deployments_total[1h])) * 100"
+          }
+        ],
+        "unit": "percent",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 12}
+      },
+      {
+        "id": 7,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(agent_errors_total[5m])"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 6, "y": 12}
+      },
+      {
+        "id": 8,
+        "title": "LLM Response Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(llm_response_duration_seconds_bucket[5m]))"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 9,
+        "title": "Agents by Status",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "count by (status) (agent_status)"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 10,
+        "title": "Webhook Latency (p95)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(webhook_duration_seconds_bucket[5m]))"
+          }
+        ],
+        "unit": "ms",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 24}
+      }
+    ],
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timezone": "browser",
+    "schemaVersion": 36,
+    "version": 1
+  }
+}

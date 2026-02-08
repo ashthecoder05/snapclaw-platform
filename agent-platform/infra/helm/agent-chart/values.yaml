@@ -1,0 +1,35 @@
+# Default values for AI agent
+# These will be overridden by the control API for each deployment
+
+agentId: ""
+userId: ""
+model: "gpt-4o"
+
+image:
+  repository: your-registry/ai-agent
+  tag: latest
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Secrets (injected by control API)
+secrets:
+  botToken: ""
+  openaiApiKey: ""
+  openaiEndpoint: ""
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3

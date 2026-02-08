@@ -1,0 +1,51 @@
+# Azure Container Instance - OpenClaw Deployment
+# This runs in Azure cloud, NOT on your laptop
+apiVersion: 2021-10-01
+location: eastus
+name: openclaw-isolated
+properties:
+  containers:
+  - name: openclaw
+    properties:
+      image: ghcr.io/openclaw/openclaw:latest  # Or your custom image
+      resources:
+        requests:
+          cpu: 1.0
+          memoryInGb: 1.5
+      ports:
+      - port: 8080
+        protocol: TCP
+      environmentVariables:
+      - name: OPENAI_API_KEY
+        secureValue: your-api-key-here
+      - name: NODE_ENV
+        value: production
+      # Security settings - container runs isolated
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+        readOnlyRootFilesystem: true
+
+  # Network isolation
+  ipAddress:
+    type: Public
+    ports:
+    - protocol: tcp
+      port: 8080
+    dnsNameLabel: openclaw-isolated
+
+  # Resource limits
+  osType: Linux
+  restartPolicy: OnFailure
+
+---
+# Deploy with:
+# az container create --resource-group myResourceGroup --file azure-deploy.yaml
+
+# Access at:
+# http://openclaw-isolated.eastus.azurecontainer.io:8080
+
+# Delete when done:
+# az container delete --name openclaw-isolated --resource-group myResourceGroup

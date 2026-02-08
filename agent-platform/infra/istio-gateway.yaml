@@ -1,0 +1,44 @@
+# Istio Gateway for webhook routing
+# Since you already use Istio, this routes traffic to agent pods
+
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: agent-gateway
+  namespace: agents
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: agent-platform-cert
+    hosts:
+    - "*.yourdomain.com"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: agent-webhooks
+  namespace: agents
+spec:
+  hosts:
+  - "yourdomain.com"
+  gateways:
+  - agent-gateway
+  http:
+  # Dynamic routing: /webhook/{agent-id} → service
+  - match:
+    - uri:
+        prefix: "/webhook/"
+    rewrite:
+      uri: "/webhook"
+    route:
+    - destination:
+        host: "{{ agent-id }}.agents.svc.cluster.local"
+        port:
+          number: 80

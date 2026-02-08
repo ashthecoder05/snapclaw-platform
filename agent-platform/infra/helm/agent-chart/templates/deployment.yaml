@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.agentId }}
+  labels:
+    app: {{ .Values.agentId }}
+    type: agent
+    user: {{ .Values.userId }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.agentId }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.agentId }}
+    spec:
+      containers:
+      - name: agent
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.targetPort }}
+        env:
+        - name: USER_ID
+          value: "{{ .Values.userId }}"
+        - name: MODEL
+          value: "{{ .Values.model }}"
+        - name: BOT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.agentId }}-secret
+              key: BOT_TOKEN
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.agentId }}-secret
+              key: OPENAI_API_KEY
+        - name: OPENAI_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.agentId }}-secret
+              key: OPENAI_ENDPOINT
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: 10
+          periodSeconds: 5
